@@ -7,51 +7,55 @@ import {
   CircularProgress,
   useMediaQuery,
 } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { clearMessage, updateUserProfile } from "../../store/reducers/User";
+import { clearMessage, updatePassword, updateUserProfile } from "../../../store/reducers/User";
 import { toast, Toaster } from "react-hot-toast";
 
 // Initial form values
 const initialValues = {
-  firstName: "",
-  lastName: "",
-  email: "",
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
 };
 
 // Validation Schema
 const validationSchema = yup.object().shape({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
+  oldPassword: yup.string().required("Old password is required"),
+  newPassword: yup.string().required("New password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("newPassword"), null], "Passwords must match")
+    .required("Confirm password is required"),
 });
 
-const Form = () => {
+const ChangePassword = () => {
   const dispatch = useDispatch();
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   // State to manage button disabled state
-  const [isProfileDisabled, setIsProfileDisabled] = useState(true);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   // Redux state
   const { isAuthenticated, isLoading, message, error } = useSelector(
-    (state) => state.authReducier
+    (state) => state.authReducier // Fixed typo in reducer name
   );
 
   const handleFormSubmit = (values, actions) => {
     if (isAuthenticated) {
-      dispatch(updateUserProfile(values));
+      dispatch(updatePassword(values));
       actions.resetForm({ values: initialValues });
     } else {
-      toast.error("You must be authenticated to update your profile.");
+      toast.error("You must be authenticated to update your password.");
     }
   };
 
-  const handleProfileInputChange = (values) => {
-    const isEmpty = !values.firstName || !values.lastName || !values.email;
-    setIsProfileDisabled(isEmpty);
+  const handleInputChange = (values) => {
+    const isEmpty =
+      !values.oldPassword || !values.newPassword || !values.confirmPassword;
+    setIsButtonDisabled(isEmpty);
   };
 
   useEffect(() => {
@@ -84,17 +88,16 @@ const Form = () => {
           justifyContent="center"
           alignItems="center"
           minHeight="80vh"
-          // bgcolor="#f5f5f5"
           p={3}
         >
           <Box
             width={isNonMobile ? "50%" : "90%"}
-            // bgcolor="white"
             p={4}
             borderRadius="10px"
             boxShadow="0 4px 10px rgba(0, 0, 0, 0.1)"
+            // bgcolor="#ffffff"
           >
-            <Header title="Settings" subtitle="Update your settings" />
+            <Header title="Change Password" subtitle="Secure your account" />
             <Formik
               initialValues={initialValues}
               validationSchema={validationSchema}
@@ -108,7 +111,7 @@ const Form = () => {
                 handleChange,
                 handleSubmit,
               }) => {
-                handleProfileInputChange(values);
+                handleInputChange(values);
                 return (
                   <form onSubmit={handleSubmit}>
                     <Typography
@@ -121,59 +124,57 @@ const Form = () => {
                         color: "#1976d2",
                       }}
                     >
-                      Update Profile
+                      Update Password
                     </Typography>
                     <Box display="grid" gap="20px">
                       <TextField
                         fullWidth
                         variant="outlined"
-                        type="text"
-                        label="First Name"
+                        type="password"
+                        label="Old Password"
                         onBlur={handleBlur}
                         onChange={handleChange}
-                        value={values.firstName}
-                        name="firstName"
-                        error={Boolean(touched.firstName && errors.firstName)}
-                        helperText={touched.firstName && errors.firstName}
+                        value={values.oldPassword}
+                        name="oldPassword"
+                        error={Boolean(touched.oldPassword && errors.oldPassword)}
+                        helperText={touched.oldPassword && errors.oldPassword}
                       />
                       <TextField
                         fullWidth
                         variant="outlined"
-                        type="text"
-                        label="Last Name"
+                        type="password"
+                        label="New Password"
                         onBlur={handleBlur}
                         onChange={handleChange}
-                        value={values.lastName}
-                        name="lastName"
-                        error={Boolean(touched.lastName && errors.lastName)}
-                        helperText={touched.lastName && errors.lastName}
+                        value={values.newPassword}
+                        name="newPassword"
+                        error={Boolean(touched.newPassword && errors.newPassword)}
+                        helperText={touched.newPassword && errors.newPassword}
                       />
                       <TextField
                         fullWidth
                         variant="outlined"
-                        type="email"
-                        label="Email"
+                        type="password"
+                        label="Confirm Password"
                         onBlur={handleBlur}
                         onChange={handleChange}
-                        value={values.email}
-                        name="email"
-                        error={Boolean(touched.email && errors.email)}
-                        helperText={touched.email && errors.email}
+                        value={values.confirmPassword}
+                        name="confirmPassword"
+                        error={Boolean(
+                          touched.confirmPassword && errors.confirmPassword
+                        )}
+                        helperText={touched.confirmPassword && errors.confirmPassword}
                       />
                     </Box>
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      mt={4}
-                    >
+                    <Box display="flex" justifyContent="center" mt={4}>
                       <Button
                         type="submit"
                         color="primary"
                         variant="contained"
                         size="large"
-                        disabled={isProfileDisabled}
+                        disabled={isButtonDisabled}
                       >
-                        Update Profile
+                        Update Password
                       </Button>
                     </Box>
                   </form>
@@ -187,4 +188,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default ChangePassword;
