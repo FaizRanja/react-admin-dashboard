@@ -13,15 +13,14 @@ import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { clearMessage, updateUserProfile } from "../../store/reducers/User";
 import { toast, Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-// Initial form values
 const initialValues = {
   firstName: "",
   lastName: "",
   email: "",
 };
 
-// Validation Schema
 const validationSchema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
@@ -31,12 +30,10 @@ const validationSchema = yup.object().shape({
 const Form = () => {
   const dispatch = useDispatch();
   const isNonMobile = useMediaQuery("(min-width:600px)");
+  const navigate = useNavigate();
 
-  // State to manage button disabled state
   const [isProfileDisabled, setIsProfileDisabled] = useState(true);
-
-  // Redux state
-  const { isAuthenticated, isLoading, message, error } = useSelector(
+  const { isAuthenticated, isLoading, user, message, error } = useSelector(
     (state) => state.authReducier
   );
 
@@ -44,13 +41,14 @@ const Form = () => {
     if (isAuthenticated) {
       dispatch(updateUserProfile(values));
       actions.resetForm({ values: initialValues });
+      navigate("/account");
     } else {
       toast.error("You must be authenticated to update your profile.");
     }
   };
 
-  const handleProfileInputChange = (values) => {
-    const isEmpty = !values.firstName || !values.lastName || !values.email;
+  const handleInputChange = (values) => {
+    const isEmpty = !values.firstName || !values.lastName ;
     setIsProfileDisabled(isEmpty);
   };
 
@@ -84,19 +82,25 @@ const Form = () => {
           justifyContent="center"
           alignItems="center"
           minHeight="80vh"
-          // bgcolor="#f5f5f5"
           p={3}
         >
           <Box
             width={isNonMobile ? "50%" : "90%"}
-            // bgcolor="white"
             p={4}
+            
             borderRadius="10px"
             boxShadow="0 4px 10px rgba(0, 0, 0, 0.1)"
           >
             <Header title="Settings" subtitle="Update your settings" />
             <Formik
-              initialValues={initialValues}
+              initialValues={{
+                ...initialValues,
+                email: user?.email || "", // Prepopulate email if available
+                firstName: user?.firstName || "", // Prepopulate email if available
+                lastName: user?.lastName || "", // Prepopulate email if available
+
+
+              }}
               validationSchema={validationSchema}
               onSubmit={handleFormSubmit}
             >
@@ -107,78 +111,80 @@ const Form = () => {
                 handleBlur,
                 handleChange,
                 handleSubmit,
-              }) => {
-                handleProfileInputChange(values);
-                return (
-                  <form onSubmit={handleSubmit}>
-                    <Typography
-                      variant="h5"
-                      gutterBottom
-                      sx={{
-                        mb: 3,
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        color: "#1976d2",
+              }) => (
+                <form onSubmit={handleSubmit}>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{
+                      mb: 3,
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      color: "#1976d2",
+                    }}
+                  >
+                    Update Profile
+                  </Typography>
+                  <Box display="grid" gap="20px">
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      type="text"
+                      label="First Name"
+                      onBlur={handleBlur}
+                      onChange={(e) => {
+                        handleChange(e);
+                        handleInputChange(values);
                       }}
+                      value={values.firstName}
+                      name="firstName"
+                      error={Boolean(touched.firstName && errors.firstName)}
+                      helperText={touched.firstName && errors.firstName}
+                    />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      type="text"
+                      label="Last Name"
+                      onBlur={handleBlur}
+                      onChange={(e) => {
+                        handleChange(e);
+                        handleInputChange(values);
+                      }}
+                      value={values.lastName}
+                      name="lastName"
+                      error={Boolean(touched.lastName && errors.lastName)}
+                      helperText={touched.lastName && errors.lastName}
+                    />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      type="email"
+                      label="Email"
+                      onBlur={handleBlur}
+                      onChange={(e) => {
+                        handleChange(e);
+                        handleInputChange(values);
+                      }}
+                      value={values.email}
+                      name="email"
+                      error={Boolean(touched.email && errors.email)}
+                      helperText={touched.email && errors.email}
+                    />
+                  </Box>
+                  <Box display="flex" justifyContent="center" mt={4}>
+                    <Button
+                      type="submit"
+                      color="primary"
+                      variant="contained"
+                      size="large"
+                      disabled={isProfileDisabled}
                     >
                       Update Profile
-                    </Typography>
-                    <Box display="grid" gap="20px">
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        type="text"
-                        label="First Name"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.firstName}
-                        name="firstName"
-                        error={Boolean(touched.firstName && errors.firstName)}
-                        helperText={touched.firstName && errors.firstName}
-                      />
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        type="text"
-                        label="Last Name"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.lastName}
-                        name="lastName"
-                        error={Boolean(touched.lastName && errors.lastName)}
-                        helperText={touched.lastName && errors.lastName}
-                      />
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        type="email"
-                        label="Email"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.email}
-                        name="email"
-                        error={Boolean(touched.email && errors.email)}
-                        helperText={touched.email && errors.email}
-                      />
-                    </Box>
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      mt={4}
-                    >
-                      <Button
-                        type="submit"
-                        color="primary"
-                        variant="contained"
-                        size="large"
-                        disabled={isProfileDisabled}
-                      >
-                        Update Profile
-                      </Button>
-                    </Box>
-                  </form>
-                );
-              }}
+                    </Button>
+                  </Box>
+                </form>
+              )}
             </Formik>
           </Box>
         </Box>

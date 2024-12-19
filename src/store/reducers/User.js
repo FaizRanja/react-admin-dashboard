@@ -147,6 +147,22 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload?.message || "An unexpected error occurred.";
       })
+      
+      // Get User Details 
+      .addCase(GetUserDetails.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(GetUserDetails.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.message = " WellCome to your Profile!";
+      })
+      .addCase(GetUserDetails.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "An unexpected error occurred.";
+      })
 
       // Update Password
       .addCase(updatePassword.pending, (state) => {
@@ -179,7 +195,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload?.message || "An unexpected error occurred.";
+        state.error = action.payload?.message || "Worng Password and Email";
       });
   },
 });

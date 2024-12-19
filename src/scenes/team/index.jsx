@@ -1,115 +1,145 @@
-import { Box, Typography, useTheme } from "@mui/material";
-import { Header } from "../../components";
-import { DataGrid } from "@mui/x-data-grid";
-import { mockDataTeam } from "../../data/mockData";
-import { tokens } from "../../theme";
+import React, { useState } from "react";
 import {
-  AdminPanelSettingsOutlined,
-  LockOpenOutlined,
-  SecurityOutlined,
-} from "@mui/icons-material";
+  Box,
+  Avatar,
+  Typography,
+  TextField,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
 
-const Team = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+const index = () => {
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [message, setMessage] = useState("");
+  const [chats, setChats] = useState({
+    user1: [],
+    user2: [],
+    user3: [],
+  });
 
-  const columns = [
-    { field: "id", headerName: "ID" },
-    {
-      field: "name",
-      headerName: "Name",
-      flex: 1,
-      cellClassName: "name-column--cell",
-    },
-    {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    { field: "phone", headerName: "Phone Number", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1 },
-    {
-      field: "access",
-      headerName: "Access Level",
-      flex: 1,
-      renderCell: ({ row: { access } }) => {
-        return (
+  const users = [
+    { id: "user1", name: "John Doe", avatar: "https://i.pravatar.cc/150?img=1" },
+    { id: "user2", name: "Jane Smith", avatar: "https://i.pravatar.cc/150?img=2" },
+    { id: "user3", name: "Michael Lee", avatar: "https://i.pravatar.cc/150?img=3" },
+  ];
+
+  const handleSendMessage = () => {
+    if (message.trim() && selectedUser) {
+      setChats({
+        ...chats,
+        [selectedUser.id]: [...chats[selectedUser.id], { text: message, sender: "me" }],
+      });
+      setMessage("");
+    }
+  };
+
+  return (
+    <Box display="flex" height="80vh">
+      {/* Left Side - User List */}
+      <Box width="30%" p={2} boxShadow="2px 0px 5px rgba(0, 0, 0, 0.1)">
+        <Typography variant="h6" fontWeight="bold" mb={2}>
+          Users
+        </Typography>
+        <List>
+          {users.map((user) => (
+            <ListItem
+              key={user.id}
+              button
+              onClick={() => setSelectedUser(user)}
+              selected={selectedUser?.id === user.id}
+            >
+              <ListItemAvatar>
+                <Avatar src={user.avatar} alt={user.name} />
+              </ListItemAvatar>
+              <ListItemText primary={user.name} />
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+
+      {/* Right Side - Chat Area */}
+      {selectedUser ? (
+        <Box flex={1} display="flex" flexDirection="column">
+          {/* Chat Header */}
           <Box
-            width="120px"
-            p={1}
+            p={2}
+            boxShadow="0px 2px 5px rgba(0, 0, 0, 0.1)"
             display="flex"
             alignItems="center"
-            justifyContent="center"
-            gap={1}
-            bgcolor={
-              access === "admin"
-                ? colors.greenAccent[600]
-                : colors.greenAccent[700]
-            }
-            borderRadius={1}
           >
-            {access === "admin" && <AdminPanelSettingsOutlined />}
-            {access === "manager" && <SecurityOutlined />}
-            {access === "user" && <LockOpenOutlined />}
-            <Typography textTransform="capitalize">{access}</Typography>
+            <Avatar src={selectedUser.avatar} alt={selectedUser.name} />
+            <Typography variant="h6" ml={2}>
+              {selectedUser.name}
+            </Typography>
           </Box>
-        );
-      },
-    },
-  ];
-  return (
-    <Box m="20px">
-      <Header title="TEAM" subtitle="Managing the Team Members" />
-      <Box
-        mt="40px"
-        height="75vh"
-        flex={1}
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            border: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
-        }}
-      >
-        <DataGrid
-          rows={mockDataTeam}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          checkboxSelection
-        />
-      </Box>
+
+          {/* Chat Messages */}
+          <Box flex={1} p={2} bgcolor="#e9f5fe" overflow="auto">
+            {chats[selectedUser.id].length > 0 ? (
+              chats[selectedUser.id].map((chat, index) => (
+                <Box
+                  key={index}
+                  display="flex"
+                  justifyContent={chat.sender === "me" ? "flex-end" : "flex-start"}
+                  mb={2}
+                >
+                  <Box
+                    bgcolor={chat.sender === "me" ? "#1976d2" : "white"}
+                    color={chat.sender === "me" ? "white" : "black"}
+                    px={2}
+                    py={1}
+                    borderRadius="10px"
+                    maxWidth="70%"
+                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.1)"
+                  >
+                    {chat.text}
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Typography color="gray" textAlign="center">
+                No messages yet.
+              </Typography>
+            )}
+          </Box>
+
+          {/* Chat Input */}
+          <Box
+            display="flex"
+            alignItems="center"
+            p={2}
+            bgcolor="white"
+            boxShadow="0px -2px 5px rgba(0, 0, 0, 0.1)"
+          >
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Type your message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <IconButton
+              color="secondary"
+              onClick={handleSendMessage}
+              disabled={!message.trim()}
+            >
+              <SendIcon />
+            </IconButton>
+          </Box>
+        </Box>
+      ) : (
+        <Box flex={1} display="flex" alignItems="center" justifyContent="center">
+          <Typography variant="h6" color="gray">
+            Select a user to start chatting
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };
 
-export default Team;
+export default index;

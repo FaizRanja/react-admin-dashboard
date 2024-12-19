@@ -47,7 +47,8 @@ const Login = () => {
 
   const registerSubmit = (e) => {
     e.preventDefault();
-    const myForm = { firstName, lastName, email, password };
+    const myForm = { firstName, lastName, email, password , avatar };
+    console.log(myForm)
     dispatch(registerUser(myForm));
     
   };

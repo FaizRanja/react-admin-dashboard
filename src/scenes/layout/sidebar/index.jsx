@@ -22,12 +22,18 @@ import avatar from "../../../assets/images/avatar.png";
 import logo from "../../../assets/images/logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
+import { useSelector } from "react-redux";
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const {  user} = useSelector(
+    (state) => state.authReducier
+  );
+
   return (
     <Sidebar
       backgroundColor={colors.primary[400]}
@@ -98,7 +104,7 @@ const SideBar = () => {
         >
           <Avatar
             alt="avatar"
-            src={avatar}
+            src={user?.avatar?.url || "/default-avatar.png"}
             sx={{ width: "100px", height: "100px" }}
           />
           <Box sx={{ textAlign: "center" }}>

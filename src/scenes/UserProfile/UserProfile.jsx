@@ -86,7 +86,7 @@ const UserProfile = () => {
                 variant="h5"
                 sx={{ fontWeight: "bold", color: "#1976d2" }}
               >
-                {user?.name || "User Name"}
+                {user?.firstName  || "User Name"}{user?.lastName  || "User Name"}
               </Typography>
               <Typography variant="body1" sx={{ color: "#555" }}>
                 {user?.email || "user@example.com"}

@@ -13,6 +13,7 @@ import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { clearMessage, updatePassword, updateUserProfile } from "../../../store/reducers/User";
 import { toast, Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 // Initial form values
 const initialValues = {
@@ -34,6 +35,7 @@ const validationSchema = yup.object().shape({
 const ChangePassword = () => {
   const dispatch = useDispatch();
   const isNonMobile = useMediaQuery("(min-width:600px)");
+const navigate=useNavigate()
 
   // State to manage button disabled state
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -47,6 +49,7 @@ const ChangePassword = () => {
     if (isAuthenticated) {
       dispatch(updatePassword(values));
       actions.resetForm({ values: initialValues });
+      navigate("/account")
     } else {
       toast.error("You must be authenticated to update your password.");
     }
