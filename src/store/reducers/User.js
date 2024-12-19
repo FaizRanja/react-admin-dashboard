@@ -29,6 +29,8 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+funct
+
 export const updateUserProfile = createAsyncThunk(
   "auth/updateUserProfile",
   async (values, { rejectWithValue }) => {
