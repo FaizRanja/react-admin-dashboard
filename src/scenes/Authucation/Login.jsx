@@ -26,13 +26,12 @@ const Login = () => {
   const [loginPassword, setLoginPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
+    Username: "",
     email: "",
     password: "",
   });
 
-  const { firstName, lastName, email, password } = user;
+  const { Username, email, password } = user;
 
   // Handlers
   const togglePasswordVisibility = () => {
@@ -47,11 +46,12 @@ const Login = () => {
 
   const registerSubmit = (e) => {
     e.preventDefault();
-    const myForm = { firstName, lastName, email, password , avatar };
+    const myForm = { Username, email, password , avatar };
     console.log(myForm)
     dispatch(registerUser(myForm));
-    
   };
+
+  
 
   const registerDataChange = (e) => {
     if (e.target.name === "avatar") {
@@ -152,26 +152,15 @@ const Login = () => {
                 encType="multipart/form-data"
                 onSubmit={registerSubmit}
               >
+                
                 <div className="signUpName">
                   <FaceIcon />
                   <input
                     type="text"
-                    placeholder="First Name"
+                    placeholder="Username " 
                     required
-                    name="firstName"
-                    value={firstName}
-                    onChange={registerDataChange}
-                  />
-                </div>
-
-                <div className="signUpName">
-                  <FaceIcon />
-                  <input
-                    type="text"
-                    placeholder="Last Name"
-                    required
-                    name="lastName"
-                    value={lastName}
+                    name="Username"
+                    value={Username}
                     onChange={registerDataChange}
                   />
                 </div>

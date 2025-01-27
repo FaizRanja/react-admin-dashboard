@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8000", // Replace with your backend URL
+        target: "http://localhost:4000", // Replace with your backend URL
         changeOrigin: true, // Handle CORS
         secure: false, // Set false for development
         cookieDomainRewrite: "localhost", // Rewrite cookies domain

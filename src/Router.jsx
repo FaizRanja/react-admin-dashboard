@@ -26,7 +26,7 @@ import UserProfile from "./scenes/UserProfile/UserProfile";
 const AppRouter = () => {
   const { isAuthenticated,  } = useSelector((state) => state.authReducier) || {};
 
-
+// const isAuthenticated=true
 
   return (
     <Router>
