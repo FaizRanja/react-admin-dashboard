@@ -21,8 +21,9 @@ import Cookies from "js-cookie"
 import { useSelector } from "react-redux";
 import UpdatePassword from "./scenes/form/UpdatePassword/ChnagePassword";
 import UserProfile from "./scenes/UserProfile/UserProfile";
+import axios from "axios";
 
-
+// axios.defaults.withCredentials = true;
 const AppRouter = () => {
   const { isAuthenticated,  } = useSelector((state) => state.authReducier) || {};
 

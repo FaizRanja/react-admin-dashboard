@@ -17,9 +17,7 @@ export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (myForm, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/v1/user/register", myForm, {
-        withCredentials: true,
-      });
+      const response = await axios.post("/api/v1/user/register", myForm,);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -29,7 +27,19 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-
+export const loginUser = createAsyncThunk(
+  "auth/loginUser",
+  async (loginData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/api/v1/user/login", loginData, );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "Failed to login user." }
+      );
+    }
+  }
+);
 
 export const updateUserProfile = createAsyncThunk(
   "auth/updateUserProfile",
@@ -38,7 +48,7 @@ export const updateUserProfile = createAsyncThunk(
       const response = await axios.post(
         "/api/v1/user/updatesetting",
         values,
-        { withCredentials: true }
+      
       );
       return response.data;
     } catch (error) {
@@ -53,8 +63,9 @@ export const updatePassword = createAsyncThunk(
   "auth/updatePassword",
   async (values, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/v1/user/updatePassword", values);
+      const response = await axios.post("/api/v1/user/chandepassword", values);
       return response.data;
+      
     } catch (error) {
       return rejectWithValue(
         error.response?.data || { message: "Failed to update Password." }
@@ -63,33 +74,15 @@ export const updatePassword = createAsyncThunk(
   }
 );
 
-// Get USer Deatils 
-
-export const GetUserDetails = createAsyncThunk(
-  "auth/GetUserDetails",
-  async ( { rejectWithValue }) => {
+export const getUserDetails = createAsyncThunk(
+  "auth/getUserDetails",
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/v1/user/me");
+      const response = await axios.get("/api/v1/user/me", );
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data || { message: "Failed to Get User Details." }
-      );
-    }
-  }
-);
-
-export const loginUser = createAsyncThunk(
-  "auth/loginUser",
-  async (loginData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post("/api/v1/user/login", loginData, {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data || { message: "Failed to login user." }
+        error.response?.data || { message: "Failed to get user details." }
       );
     }
   }
@@ -111,6 +104,16 @@ const authSlice = createSlice({
     },
     clearMessage: (state) => {
       state.message = null;
+    },
+    initializeAuthState: (state) => {
+      const token = Cookies.get("token");
+      if (token) {
+        state.token = token;
+        state.isAuthenticated = true;
+      } else {
+        state.token = null;
+        state.isAuthenticated = false;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -134,7 +137,26 @@ const authSlice = createSlice({
         state.error = action.payload?.message || "An unexpected error occurred.";
       })
 
-      // Update Profile
+      // Login User
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        Cookies.set("token", action.payload.token);
+        state.isAuthenticated = true;
+        state.message = "Login successful! Welcome back!";
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Invalid email or password.";
+      })
+
+      // Update User Profile
       .addCase(updateUserProfile.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -146,22 +168,6 @@ const authSlice = createSlice({
         state.message = "Profile updated successfully!";
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload?.message || "An unexpected error occurred.";
-      })
-      
-      // Get User Details 
-      .addCase(GetUserDetails.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-        state.message = null;
-      })
-      .addCase(GetUserDetails.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload.user;
-        state.message = " WellCome to your Profile!";
-      })
-      .addCase(GetUserDetails.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || "An unexpected error occurred.";
       })
@@ -181,26 +187,23 @@ const authSlice = createSlice({
         state.error = action.payload?.message || "An unexpected error occurred.";
       })
 
-      // Login User
-      .addCase(loginUser.pending, (state) => {
+      // Get User Details
+      .addCase(getUserDetails.pending, (state) => {
         state.isLoading = true;
         state.error = null;
         state.message = null;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(getUserDetails.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
-        Cookies.set("token", action.payload.token);
-        state.isAuthenticated = true;
-        state.message = "Login successful! Welcome back!";
+        state.message = "Welcome to your profile!";
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(getUserDetails.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload?.message || "Worng Password and Email";
+        state.error = action.payload?.message || "An unexpected error occurred.";
       });
   },
 });
 
-export const { logout, clearMessage } = authSlice.actions;
+export const { logout, clearMessage, initializeAuthState } = authSlice.actions;
 export default authSlice.reducer;

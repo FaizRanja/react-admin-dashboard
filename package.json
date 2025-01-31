@@ -30,6 +30,7 @@
     "@reduxjs/toolkit": "^2.4.0",
     "alert": "^6.0.2",
     "axios": "^1.7.9",
+    "cookie-parser": "^1.4.7",
     "formik": "^2.4.5",
     "js-cookie": "^3.0.5",
     "react": "^18.2.0",
