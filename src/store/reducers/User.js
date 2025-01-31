@@ -46,7 +46,7 @@ export const updateUserProfile = createAsyncThunk(
   async (values, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "/api/v1/user/updatesetting",
+        "/api/v1/user/UpdateUserProfile",
         values,
       
       );

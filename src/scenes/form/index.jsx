@@ -6,6 +6,8 @@ import {
   Typography,
   CircularProgress,
   useMediaQuery,
+  Avatar,
+  IconButton,
 } from "@mui/material";
 import { Header } from "../../components";
 import { Formik } from "formik";
@@ -14,16 +16,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearMessage, updateUserProfile } from "../../store/reducers/User";
 import { toast, Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { PhotoCamera } from "@mui/icons-material";
 
 const initialValues = {
-  firstName: "",
-  lastName: "",
+  Username: "",
   email: "",
+  avatar: null,
 };
 
 const validationSchema = yup.object().shape({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
+  Username: yup.string().required("Username is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
 });
 
@@ -33,13 +35,21 @@ const Form = () => {
   const navigate = useNavigate();
 
   const [isProfileDisabled, setIsProfileDisabled] = useState(true);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const { isAuthenticated, isLoading, user, message, error } = useSelector(
     (state) => state.authReducier
   );
 
   const handleFormSubmit = (values, actions) => {
     if (isAuthenticated) {
-      dispatch(updateUserProfile(values));
+      const formData = new FormData();
+      formData.append("Username", values.Username);
+      formData.append("email", values.email);
+      if (values.avatar) {
+        formData.append("avatar", values.avatar);
+      }
+console.log("formData",formData)
+      dispatch(updateUserProfile(formData));
       actions.resetForm({ values: initialValues });
       navigate("/account");
     } else {
@@ -48,8 +58,16 @@ const Form = () => {
   };
 
   const handleInputChange = (values) => {
-    const isEmpty = !values.firstName || !values.lastName ;
+    const isEmpty = !values.Username || !values.email;
     setIsProfileDisabled(isEmpty);
+  };
+
+  const handleAvatarChange = (event, setFieldValue) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFieldValue("avatar", file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
   };
 
   useEffect(() => {
@@ -87,7 +105,6 @@ const Form = () => {
           <Box
             width={isNonMobile ? "50%" : "90%"}
             p={4}
-            
             borderRadius="10px"
             boxShadow="0 4px 10px rgba(0, 0, 0, 0.1)"
           >
@@ -95,11 +112,9 @@ const Form = () => {
             <Formik
               initialValues={{
                 ...initialValues,
-                email: user?.email || "", // Prepopulate email if available
-                firstName: user?.firstName || "", // Prepopulate email if available
-                lastName: user?.lastName || "", // Prepopulate email if available
-
-
+                email: user?.email || "",
+                Username: user?.Username || "",
+                avatar: user?.avatar?.url || null,
               }}
               validationSchema={validationSchema}
               onSubmit={handleFormSubmit}
@@ -111,6 +126,7 @@ const Form = () => {
                 handleBlur,
                 handleChange,
                 handleSubmit,
+                setFieldValue,
               }) => (
                 <form onSubmit={handleSubmit}>
                   <Typography
@@ -125,36 +141,39 @@ const Form = () => {
                   >
                     Update Profile
                   </Typography>
+                  <Box display="flex" justifyContent="center" mb={3}>
+                    <input
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      id="avatar-upload"
+                      type="file"
+                      onChange={(event) => handleAvatarChange(event, setFieldValue)}
+                    />
+                    <label htmlFor="avatar-upload">
+                      <IconButton color="primary" component="span">
+                        <Avatar
+                          src={avatarPreview || user?.avatar?.url || null  }
+                          sx={{ width: 100, height: 100 }}
+                        />
+                        <PhotoCamera sx={{ position: "absolute", bottom: 0, right: 0 }} />
+                      </IconButton>
+                    </label>
+                  </Box>
                   <Box display="grid" gap="20px">
                     <TextField
                       fullWidth
                       variant="outlined"
                       type="text"
-                      label="First Name"
+                      label="Username"
                       onBlur={handleBlur}
                       onChange={(e) => {
                         handleChange(e);
                         handleInputChange(values);
                       }}
-                      value={values.firstName}
-                      name="firstName"
-                      error={Boolean(touched.firstName && errors.firstName)}
-                      helperText={touched.firstName && errors.firstName}
-                    />
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      type="text"
-                      label="Last Name"
-                      onBlur={handleBlur}
-                      onChange={(e) => {
-                        handleChange(e);
-                        handleInputChange(values);
-                      }}
-                      value={values.lastName}
-                      name="lastName"
-                      error={Boolean(touched.lastName && errors.lastName)}
-                      helperText={touched.lastName && errors.lastName}
+                      value={values.Username}
+                      name="Username"
+                      error={Boolean(touched.Username && errors.Username)}
+                      helperText={touched.Username && errors.Username}
                     />
                     <TextField
                       fullWidth
